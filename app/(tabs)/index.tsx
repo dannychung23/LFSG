@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { Alert, Button, Image, Pressable, SafeAreaView, StyleSheet, Switch, Text, TextInput, View } from 'react-native'
 const logo = require("../../assets/images/lfsg_icon.png")
-import {auth} from '../../FirebaseConfig';
+import {auth, db} from '../../FirebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { router } from 'expo-router';
-import { LogBox } from "react-native"
+import { LogBox } from "react-native";
 
 LogBox.ignoreAllLogs(true)
 
@@ -39,9 +39,7 @@ export default function HomeScreen() {
   const signUp = async () => {
     setLoading(true);
     try {
-      const response = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-      console.log(response);
-      alert('Check your email');
+      router.replace('./newUser');
     } catch (error) {
       console.log(error);
       alert('Sign up failed\n' + error);
