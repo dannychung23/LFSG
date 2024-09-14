@@ -1,70 +1,125 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import React, { useState } from 'react'
+import { Alert, Button, Image, Pressable, SafeAreaView, StyleSheet, Switch, Text, TextInput, View } from 'react-native'
+const logo = require("../../assets/images/lfsg_icon.png")
 
 export default function HomeScreen() {
+  const [click,setClick] = useState(false);
+  const [username,setUsername]=  useState("");
+  const [password,setPassword]=  useState("");
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView style={styles.container}>
+    <Text style={styles.title}>LFSG</Text>
+    <Image source={logo} style={styles.image} resizeMode='contain' />
+    <View style={styles.inputView}>
+        <TextInput style={styles.input} placeholder='EMAIL OR USERNAME' value={username} onChangeText={setUsername} autoCorrect={false}
+    autoCapitalize='none' placeholderTextColor={"black"}/>
+        <TextInput style={styles.input} placeholder='PASSWORD' secureTextEntry value={password} onChangeText={setPassword} autoCorrect={false}
+    autoCapitalize='none' placeholderTextColor={"black"}/>
+    </View>
+    <View style={styles.rememberView}>
+        <View style={styles.switch}>
+            <Switch  value={click} onValueChange={setClick} trackColor={{true : "green" , false : "gray"}} />
+            <Text style={styles.rememberText}>Remember Me</Text>
+        </View>
+        <View>
+            <Pressable onPress={() => Alert.alert("Forget Password!")}>
+                <Text style={styles.forgetText}>Forgot Password?</Text>
+            </Pressable>
+        </View>
+    </View>
+
+    <View style={styles.buttonView}>
+        <Pressable style={styles.button} onPress={() => Alert.alert("Login Successfull!")}>
+            <Text style={styles.buttonText}>LOGIN</Text>
+        </Pressable>
+
+    </View>
+
+    <Text style={styles.footerText}>Don't Have Account?<Text style={styles.signup}>  Sign Up</Text></Text>
+
+    
+  </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container : {
+    alignItems : "center",
+    paddingTop: 70,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  image : {
+    height : 160,
+    width : 170
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  title : {
+    fontSize : 30,
+    fontWeight : "bold",
+    textTransform : "uppercase",
+    textAlign: "center",
+    paddingVertical : 40,
+    color : "green"
   },
-});
+  inputView : {
+    gap : 15,
+    width : "100%",
+    paddingHorizontal : 40,
+    marginTop : 50,
+    marginBottom  :50
+  },
+  input : {
+    height : 50,
+    paddingHorizontal : 20,
+    borderColor : "green",
+    borderWidth : 1,
+    borderRadius: 7
+  },
+  rememberView : {
+    width : "100%",
+    paddingHorizontal : 50,
+    justifyContent: "space-between",
+    alignItems : "center",
+    flexDirection : "row",
+    marginBottom : 50
+  },
+  switch :{
+    flexDirection : "row",
+    gap : 1,
+    justifyContent : "center",
+    alignItems : "center"
+    
+  },
+  rememberText : {
+    fontSize: 13
+  },
+  forgetText : {
+    fontSize : 11,
+    color : "blue"
+  },
+  button : {
+    backgroundColor : "green",
+    height : 45,
+    borderColor : "gray",
+    borderWidth  : 1,
+    borderRadius : 5,
+    alignItems : "center",
+    justifyContent : "center"
+  },
+  buttonText : {
+    color : "white"  ,
+    fontSize: 18,
+    fontWeight : "bold"
+  }, 
+  buttonView :{
+    width : "100%",
+    paddingHorizontal : 50,
+    marginBottom : 50
+  },
+  footerText : {
+    textAlign: "center",
+    color : "gray",
+  },
+  signup : {
+    color : "blue",
+    fontSize : 13
+  }
+})
