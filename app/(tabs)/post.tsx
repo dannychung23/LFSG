@@ -14,7 +14,8 @@ const studyGroups = [
     { id: '3', name: 'Calculus Study Group', description: 'Master calculus concepts and prep for exams. When: Mondays, 4 PM Where: Library, Study Room B' },
   ];
 
-export default function groups() {
+export default function post() {
+    //alert(loggedIn);
     if(loggedIn){
     const renderGroupItem = ({ item }: { item: StudyGroup }) => (
         <View style={styles.groupItem}>
@@ -24,7 +25,7 @@ export default function groups() {
         );        
     return (
         <View style={styles.container}>
-        <Text style={styles.title}>Study Group Ads</Text>
+        <Text style={styles.title}>Post a Study Group Ad</Text>
         <FlatList
           data={studyGroups}
           renderItem={renderGroupItem}
@@ -33,7 +34,7 @@ export default function groups() {
       </View> 
     );
     }
-    return <Text style={styles.alert}>Please login to see the study groups.</Text>
+    return <Text style={styles.alert}>Please login to create a study group.</Text>
 }
 
 // Styles for the component

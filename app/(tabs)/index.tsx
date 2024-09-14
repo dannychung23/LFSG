@@ -3,12 +3,20 @@ import { Alert, Button, Image, Pressable, SafeAreaView, StyleSheet, Switch, Text
 const logo = require("../../assets/images/lfsg_icon.png")
 import {auth} from '../../FirebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { router } from 'expo-router';
+import { LogBox } from "react-native"
+
+LogBox.ignoreAllLogs(true)
+
+export var loggedIn = false;
+
 export default function HomeScreen() {
   
   const [click,setClick] = useState(false);
   const [email,setEmail]=  useState("");
   const [password,setPassword]=  useState("");
   const [loading,setLoading]= useState(false);
+
   const firebaseAuth = auth;
 
   const signIn = async () => {
@@ -17,6 +25,9 @@ export default function HomeScreen() {
       const response = await signInWithEmailAndPassword(firebaseAuth, email, password);
       alert('Sign in successful!')
       console.log(response);
+      loggedIn = true;
+      router.replace('./post');
+      router.replace('./groups');
     } catch (error) {
       console.log(error);
       alert('Sign in failed\n' + error);
@@ -38,6 +49,8 @@ export default function HomeScreen() {
       setLoading(false);
     }
   }
+
+  if(!loggedIn){
   return (
     <SafeAreaView style={styles.container}>
     <Text style={styles.title}>LFSG</Text>
@@ -47,17 +60,6 @@ export default function HomeScreen() {
     autoCapitalize='none' placeholderTextColor={"black"}/>
         <TextInput style={styles.input} placeholder='PASSWORD' secureTextEntry value={password} onChangeText={setPassword} autoCorrect={false}
     autoCapitalize='none' placeholderTextColor={"black"}/>
-    </View>
-    <View style={styles.rememberView}>
-        <View style={styles.switch}>
-            <Switch  value={click} onValueChange={setClick} trackColor={{true : "green" , false : "gray"}} />
-            <Text style={styles.rememberText}>Remember Me</Text>
-        </View>
-        <View>
-            <Pressable onPress={() => Alert.alert("Forget Password!")}>
-                <Text style={styles.forgetText}>Forgot Password?</Text>
-            </Pressable>
-        </View>
     </View>
 
     <View style={styles.buttonView}>
@@ -76,12 +78,24 @@ export default function HomeScreen() {
     
   </SafeAreaView>
   );
+  }
+  return(
+    <SafeAreaView style={styles.container1}>
+    <Text style={styles.title}>LFSG</Text>
+    <Image source={logo} style={styles.image} resizeMode='contain' />
+    </SafeAreaView>
+  )
 }
 
 const styles = StyleSheet.create({
   container : {
     alignItems : "center",
     paddingTop: 70,
+  },
+  container1: {
+    flex: 1,
+    justifyContent: 'center', // Centers content vertically
+    alignItems: 'center',      // Centers content horizontally
   },
   image : {
     height : 160,
