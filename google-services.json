@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "54765044915",
+    "project_id": "lfsg-1",
+    "storage_bucket": "lfsg-1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:54765044915:android:9ad0396d4596454d8f5cc6",
+        "android_client_info": {
+          "package_name": "com.dannychung.lfsg"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABVc2Co9wfKFBOqp5e3oUkJkcCcoXX1cI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
