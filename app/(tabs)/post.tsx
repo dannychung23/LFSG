@@ -1,21 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { loggedIn, auth } from './index'; 
 import { doc, addDoc, deleteDoc, onSnapshot, collection } from "firebase/firestore"; 
 import { db } from '../../FirebaseConfig';
-import { getDocs } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-
-async function getGroupCount() {
-  try {
-    const querySnapshot = await getDocs(collection(db, "groups"));
-    const count = querySnapshot.size;
-    return count + 1;
-  } catch (err) {
-    console.error("Error fetching document count: ", err);
-    return 0;
-  }
-}
 
 export default function Post() {
   const [name, setName] = useState("");
@@ -31,13 +18,17 @@ export default function Post() {
       setUser(currentUser);  // Save the current user's data
     }
 
+    // Subscribe to groups collection
     const unsubscribe = onSnapshot(collection(db, "groups"), (snapshot) => {
-      const groupsData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        name: doc.data().name,
-        description: doc.data().description,
-        userId: doc.data().userId,  // Storing the user ID for each group
-      }));
+      const groupsData = snapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          name: doc.data().name,
+          description: doc.data().description,
+          userId: doc.data().userId,  // Store userId for each group
+        }))
+        .filter((group) => group.userId === currentUser?.uid); // Only keep groups posted by the current user
+
       setStudyGroups(groupsData);
       setLoading(false);
     });
@@ -50,9 +41,10 @@ export default function Post() {
       alert('You must be logged in to post a group.');
       return;
     }
-  
+    setName("")
+    setDescription("")
     try {
-      await addDoc(collection(db, "groups"), {  // Use addDoc instead of setDoc
+      await addDoc(collection(db, "groups"), {
         name: name,
         description: description,
         userId: user.uid,  // Store the user's ID when posting the group
@@ -106,7 +98,7 @@ export default function Post() {
     setter("");
   };
 
-  if (!loggedIn) {
+  if (!user) {
     return <Text style={styles.alert}>Please login to create a study group.</Text>;
   }
 
@@ -153,7 +145,7 @@ export default function Post() {
         </Pressable>
       </View>
 
-      <Text style={styles.title}>Study Groups Posted</Text>
+      <Text style={styles.title}>Your Study Groups</Text>
       {loading ? (
         <Text>Loading...</Text>
       ) : (

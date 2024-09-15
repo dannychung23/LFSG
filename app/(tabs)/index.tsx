@@ -25,6 +25,11 @@ export default function HomeScreen() {
       alert('Sign in successful!');
       console.log(response);
       loggedIn = true;
+      
+      // Clear email and password fields after successful login
+      setEmail("");
+      setPassword("");
+  
       router.replace('./new user');
       router.replace('./post');
       router.replace('./groups');
@@ -34,7 +39,7 @@ export default function HomeScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  };  
 
   const signUp = async () => {
     setLoading(true);

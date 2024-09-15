@@ -15,6 +15,11 @@ export default function newUser() {
 
     const submit = async () => {
         setLoading(true);
+        setEmail("")
+        setPassword("")
+        setPhone("")
+        setUsername("")
+        
         try {
             var response = await createUserWithEmailAndPassword(auth, email, password);
             alert('Sign up successful!');
