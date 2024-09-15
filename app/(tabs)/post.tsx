@@ -1,152 +1,171 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { loggedIn } from './index';
+import { loggedIn, auth } from './index';  // Assuming you already have user authentication logic here
 import { doc, setDoc, deleteDoc, onSnapshot, collection } from "firebase/firestore"; 
 import { db } from '../../FirebaseConfig';
 import { getDocs } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 async function getGroupCount() {
   try {
-      const querySnapshot = await getDocs(collection(db, "groups"));
-      const count = querySnapshot.size;
-      return count + 1;
+    const querySnapshot = await getDocs(collection(db, "groups"));
+    const count = querySnapshot.size;
+    return count + 1;
   } catch (err) {
-      console.error("Error fetching document count: ", err);
-      return 0;
+    console.error("Error fetching document count: ", err);
+    return 0;
   }
 }
 
 export default function Post() {
-    const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
-    const [studyGroups, setStudyGroups] = useState([]);
-    const [loading, setLoading] = useState(true);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [studyGroups, setStudyGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
-    useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, "groups"), (snapshot) => {
-            const groupsData = snapshot.docs.map((doc) => ({
-                id: doc.id,
-                name: doc.data().name,
-                description: doc.data().description
-            }));
-            setStudyGroups(groupsData);
-            setLoading(false);
-        });
+  const currentUser = getAuth().currentUser;  // Fetch the currently logged-in user
 
-        return () => unsubscribe();
-    }, []);
-
-    const postGroup = async () => {
-        try {
-            const id = (await getGroupCount()).toString();
-            await setDoc(doc(db, "groups", id), {
-                name: name,
-                description: description,
-            });
-            alert('Posted Study Group!');
-        } catch (error) {
-            console.log(error);
-            alert('Post failed\n' + error);
-        }
-    };
-
-    const deleteGroup = async (groupId) => {
-        try {
-            await deleteDoc(doc(db, "groups", groupId));
-            alert("Group deleted successfully!");
-        } catch (error) {
-            console.log("Error deleting group:", error);
-            alert("Failed to delete group.");
-        }
-    };
-
-    const confirmDelete = (groupId) => {
-        Alert.alert(
-            "Delete Group",
-            "Are you sure you want to delete this group?",
-            [
-                { text: "Cancel", style: "cancel" },
-                { text: "Delete", style: "destructive", onPress: () => deleteGroup(groupId) }
-            ]
-        );
-    };
-
-    const renderGroupItem = ({ item }) => (
-        <View style={styles.groupItem}>
-            <Text style={styles.groupName}>{item.name}</Text>
-            <Text style={styles.groupDescription}>{item.description}</Text>
-            <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => confirmDelete(item.id)}
-            >
-                <Text style={styles.deleteButtonText}>Delete</Text>
-            </TouchableOpacity>
-        </View>
-    );
-
-    const clearInput = (setter) => {
-        setter("");
-    };
-
-    if (!loggedIn) {
-        return <Text style={styles.alert}>Please login to create a study group.</Text>;
+  useEffect(() => {
+    if (currentUser) {
+      setUser(currentUser);  // Save the current user's data
     }
 
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Post a Study Group</Text>
-        <View style={styles.inputView}>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder='Name of group'
-              value={name}
-              onChangeText={setName}
-              autoCorrect={false}
-              autoCapitalize='none'
-              placeholderTextColor={"black"}
-            />
-            {name ? (
-              <TouchableOpacity style={styles.clearButton} onPress={() => clearInput(setName)}>
-                <Text style={styles.clearButtonText}>X</Text>
-              </TouchableOpacity>
-            ) : null}
-          </View>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder='Description (with time & place)'
-              value={description}
-              onChangeText={setDescription}
-              autoCorrect={false}
-              autoCapitalize='none'
-              placeholderTextColor={"black"}
-            />
-            {description ? (
-              <TouchableOpacity style={styles.clearButton} onPress={() => clearInput(setDescription)}>
-                <Text style={styles.clearButtonText}>X</Text>
-              </TouchableOpacity>
-            ) : null}
-          </View>
-        </View>
-        <View style={styles.buttonView}>
-          <Pressable style={styles.button} onPress={postGroup}>
-              <Text style={styles.buttonText}>POST</Text>
-          </Pressable>
-        </View>
+    const unsubscribe = onSnapshot(collection(db, "groups"), (snapshot) => {
+      const groupsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.data().name,
+        description: doc.data().description,
+        userId: doc.data().userId,  // Storing the user ID for each group
+      }));
+      setStudyGroups(groupsData);
+      setLoading(false);
+    });
 
-        <Text style={styles.title}>Study Groups</Text>
-        {loading ? (
-          <Text>Loading...</Text>
-        ) : (
-          <FlatList
-            data={studyGroups}
-            renderItem={renderGroupItem}
-            keyExtractor={(item) => item.id}
-          />
-        )}
-      </View>
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  const postGroup = async () => {
+    if (!user) {
+      alert('You must be logged in to post a group.');
+      return;
+    }
+
+    try {
+      const id = (await getGroupCount()).toString();
+      await setDoc(doc(db, "groups", id), {
+        name: name,
+        description: description,
+        userId: user.uid,  // Store the user's ID when posting the group
+      });
+      alert('Posted Study Group!');
+    } catch (error) {
+      console.log(error);
+      alert('Post failed\n' + error);
+    }
+  };
+
+  const deleteGroup = async (groupId) => {
+    try {
+      await deleteDoc(doc(db, "groups", groupId));
+      alert("Group deleted successfully!");
+    } catch (error) {
+      console.log("Error deleting group:", error);
+      alert("Failed to delete group.");
+    }
+  };
+
+  const confirmDelete = (groupId) => {
+    Alert.alert(
+      "Delete Group",
+      "Are you sure you want to delete this group?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: () => deleteGroup(groupId) }
+      ]
     );
+  };
+
+  const renderGroupItem = ({ item }) => (
+    <View style={styles.groupItem}>
+      <Text style={styles.groupName}>{item.name}</Text>
+      <Text style={styles.groupDescription}>{item.description}</Text>
+      
+      {/* Show delete button only if current user posted this group */}
+      {user && item.userId === user.uid ? (
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => confirmDelete(item.id)}
+        >
+          <Text style={styles.deleteButtonText}>Delete</Text>
+        </TouchableOpacity>
+      ) : null}
+    </View>
+  );
+
+  const clearInput = (setter) => {
+    setter("");
+  };
+
+  if (!loggedIn) {
+    return <Text style={styles.alert}>Please login to create a study group.</Text>;
+  }
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Post a Study Group</Text>
+      <View style={styles.inputView}>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder='Name of group'
+            value={name}
+            onChangeText={setName}
+            autoCorrect={false}
+            autoCapitalize='none'
+            placeholderTextColor={"black"}
+          />
+          {name ? (
+            <TouchableOpacity style={styles.clearButton} onPress={() => clearInput(setName)}>
+              <Text style={styles.clearButtonText}>X</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder='Description (with time & place)'
+            value={description}
+            onChangeText={setDescription}
+            autoCorrect={false}
+            autoCapitalize='none'
+            placeholderTextColor={"black"}
+          />
+          {description ? (
+            <TouchableOpacity style={styles.clearButton} onPress={() => clearInput(setDescription)}>
+              <Text style={styles.clearButtonText}>X</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+      </View>
+      <View style={styles.buttonView}>
+        <Pressable style={styles.button} onPress={postGroup}>
+          <Text style={styles.buttonText}>POST</Text>
+        </Pressable>
+      </View>
+
+      <Text style={styles.title}>Study Groups Posted</Text>
+      {loading ? (
+        <Text>Loading...</Text>
+      ) : (
+        <FlatList
+          data={studyGroups}
+          renderItem={renderGroupItem}
+          keyExtractor={(item) => item.id}
+        />
+      )}
+    </View>
+  );
 }
 
 // Styles for the component
