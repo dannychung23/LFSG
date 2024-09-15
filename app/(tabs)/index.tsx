@@ -26,6 +26,7 @@ export default function HomeScreen() {
       alert('Sign in successful!')
       console.log(response);
       loggedIn = true;
+      router.replace('./new user');
       router.replace('./post');
       router.replace('./groups');
     } catch (error) {
@@ -39,7 +40,7 @@ export default function HomeScreen() {
   const signUp = async () => {
     setLoading(true);
     try {
-      router.replace('./newUser');
+      router.replace('./new user');
     } catch (error) {
       console.log(error);
       alert('Sign up failed\n' + error);
