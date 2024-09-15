@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet, Pressable, FlatList, TouchableOpacit
 import { doc, addDoc, deleteDoc, onSnapshot, collection } from "firebase/firestore"; 
 import { db } from '../../FirebaseConfig';
 import { getAuth } from "firebase/auth";
+import { loggedIn } from './index';
 
 export default function Post() {
   const [name, setName] = useState("");
@@ -98,7 +99,7 @@ export default function Post() {
     setter("");
   };
 
-  if (!user) {
+  if (!loggedIn) {
     return <Text style={styles.alert}>Please login to create a study group.</Text>;
   }
 

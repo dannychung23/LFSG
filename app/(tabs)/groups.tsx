@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, TextInput, Pressable } from 'react-native';
 import { loggedIn } from './index';
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from '../../FirebaseConfig';
@@ -12,8 +12,10 @@ interface StudyGroup {
 
 export default function Groups() {
     const [studyGroups, setStudyGroups] = useState<StudyGroup[]>([]);
+    const [filteredGroups, setFilteredGroups] = useState<StudyGroup[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState<string>("");
 
     useEffect(() => {
         if (loggedIn) {
@@ -26,6 +28,7 @@ export default function Groups() {
                         description: doc.data().description,
                     }));
                     setStudyGroups(groupsData);
+                    setFilteredGroups(groupsData); // Initially set filtered groups to all groups
                     setLoading(false);
                 },
                 (err) => {
@@ -41,6 +44,15 @@ export default function Groups() {
             setLoading(false);
         }
     }, [loggedIn]);
+
+    useEffect(() => {
+        // Filter the study groups based on the search query
+        const filtered = studyGroups.filter(group =>
+            group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            group.description.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setFilteredGroups(filtered);
+    }, [searchQuery, studyGroups]);
 
     const renderGroupItem = ({ item }: { item: StudyGroup }) => (
         <View style={styles.groupItem}>
@@ -64,10 +76,24 @@ export default function Groups() {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Study Groups for You</Text>
+            <View style={styles.searchContainer}>
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search groups..."
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                />
+                {searchQuery ? (
+                    <Pressable style={styles.clearButton} onPress={() => setSearchQuery('')}>
+                        <Text style={styles.clearButtonText}>X</Text>
+                    </Pressable>
+                ) : null}
+            </View>
             <FlatList
-                data={studyGroups}
+                data={filteredGroups}
                 renderItem={renderGroupItem}
                 keyExtractor={(item) => item.id}
+                ListEmptyComponent={<Text style={styles.alert}>No groups found</Text>}
             />
         </View>
     );
@@ -76,7 +102,7 @@ export default function Groups() {
 // Styles for the component
 const styles = StyleSheet.create({
     alert: {
-      marginTop: 50
+      marginTop: 50,
     },
     container: {
       flex: 1,
@@ -87,7 +113,7 @@ const styles = StyleSheet.create({
       fontSize: 24,
       fontWeight: 'bold',
       marginBottom: 20,
-      marginTop: 50
+      marginTop: 50,
     },
     groupItem: {
       padding: 15,
@@ -105,5 +131,26 @@ const styles = StyleSheet.create({
       fontSize: 14,
       color: '#666',
       marginTop: 5,
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    searchInput: {
+      flex: 1,
+      height: 40,
+      borderColor: '#ccc',
+      borderWidth: 1,
+      borderRadius: 8,
+      paddingHorizontal: 10,
+    },
+    clearButton: {
+      padding: 10,
+      marginLeft: 5,
+    },
+    clearButtonText: {
+      fontSize: 16,
+      color: 'red',
     },
 });

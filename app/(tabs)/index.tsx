@@ -57,6 +57,10 @@ export default function HomeScreen() {
     try {
       await signOut(firebaseAuth);
       loggedIn = false;
+      
+      router.replace('./groups');
+      router.replace('./new user');
+      router.replace('./post')
       router.replace('./');
       alert('Logged out successfully!');
     } catch (error) {
