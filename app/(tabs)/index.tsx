@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from 'react'
-import { Alert, Button, Image, Pressable, SafeAreaView, StyleSheet, Switch, Text, TextInput, View } from 'react-native'
-const logo = require("../../assets/images/lfsg_icon.png")
-import {auth, db} from '../../FirebaseConfig';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import React, { useState, useEffect } from 'react';
+import { Alert, Button, Image, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
+const logo = require("../../assets/images/lfsg_icon.png");
+import { auth } from '../../FirebaseConfig';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { router } from 'expo-router';
 import { LogBox } from "react-native";
 
-LogBox.ignoreAllLogs(true)
+LogBox.ignoreAllLogs(true);
 
 export var loggedIn = false;
 
 export default function HomeScreen() {
-  
-  const [click,setClick] = useState(false);
-  const [email,setEmail]=  useState("");
-  const [password,setPassword]=  useState("");
-  const [loading,setLoading]= useState(false);
+  const [click, setClick] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const firebaseAuth = auth;
 
@@ -23,7 +22,7 @@ export default function HomeScreen() {
     setLoading(true);
     try {
       const response = await signInWithEmailAndPassword(firebaseAuth, email, password);
-      alert('Sign in successful!')
+      alert('Sign in successful!');
       console.log(response);
       loggedIn = true;
       router.replace('./new user');
@@ -35,7 +34,7 @@ export default function HomeScreen() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const signUp = async () => {
     setLoading(true);
@@ -47,48 +46,94 @@ export default function HomeScreen() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  if(!loggedIn){
-  return (
-    <SafeAreaView style={styles.container}>
-    <Text style={styles.title}>LFSG</Text>
-    <Image source={logo} style={styles.image} resizeMode='contain' />
-    <View style={styles.inputView}>
-        <TextInput style={styles.input} placeholder='EMAIL' value={email} onChangeText={setEmail} autoCorrect={false}
-    autoCapitalize='none' placeholderTextColor={"black"}/>
-        <TextInput style={styles.input} placeholder='PASSWORD' secureTextEntry value={password} onChangeText={setPassword} autoCorrect={false}
-    autoCapitalize='none' placeholderTextColor={"black"}/>
-    </View>
+  const handleLogout = async () => {
+    try {
+      await signOut(firebaseAuth);
+      loggedIn = false;
+      router.replace('./');
+      alert('Logged out successfully!');
+    } catch (error) {
+      console.log(error);
+      alert('Sign out failed\n' + error);
+    }
+  };
 
-    <View style={styles.buttonView}>
-        <Pressable style={styles.button} onPress={signIn}>
+  const clearInput = (setter) => {
+    setter("");
+  };
+
+  if (!loggedIn) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.title}>LFSG</Text>
+        <Image source={logo} style={styles.image} resizeMode='contain' />
+        <View style={styles.inputView}>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder='EMAIL'
+              value={email}
+              onChangeText={setEmail}
+              autoCorrect={false}
+              autoCapitalize='none'
+              placeholderTextColor={"black"}
+            />
+            {email ? (
+              <Pressable style={styles.clearButton} onPress={() => clearInput(setEmail)}>
+                <Text style={styles.clearButtonText}>X</Text>
+              </Pressable>
+            ) : null}
+          </View>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder='PASSWORD'
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+              autoCorrect={false}
+              autoCapitalize='none'
+              placeholderTextColor={"black"}
+            />
+            {password ? (
+              <Pressable style={styles.clearButton} onPress={() => clearInput(setPassword)}>
+                <Text style={styles.clearButtonText}>X</Text>
+              </Pressable>
+            ) : null}
+          </View>
+        </View>
+
+        <View style={styles.buttonView}>
+          <Pressable style={styles.button} onPress={signIn}>
             <Text style={styles.buttonText}>LOGIN</Text>
-        </Pressable>
+          </Pressable>
+        </View>
 
-    </View>
-
-    <Text style={styles.footerText}>Don't Have Account?
-      <Pressable onPress={signUp}>
-        <Text style={styles.signup}>  Sign Up</Text>
-      </Pressable>
-    </Text>
-
-    
-  </SafeAreaView>
-  );
+        <Text style={styles.footerText}>Don't Have an Account?
+          <Pressable onPress={signUp}>
+            <Text style={styles.signup}>  Sign Up</Text>
+          </Pressable>
+        </Text>
+      </SafeAreaView>
+    );
   }
-  return(
+
+  return (
     <SafeAreaView style={styles.container1}>
-    <Text style={styles.title}>LFSG</Text>
-    <Image source={logo} style={styles.image} resizeMode='contain' />
+      <Text style={styles.title}>LFSG</Text>
+      <Image source={logo} style={styles.image} resizeMode='contain' />
+      <Pressable style={styles.button} onPress={handleLogout}>
+        <Text style={styles.buttonText}>LOGOUT</Text>
+      </Pressable>
     </SafeAreaView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
-  container : {
-    alignItems : "center",
+  container: {
+    alignItems: "center",
     paddingTop: 70,
   },
   container1: {
@@ -96,79 +141,69 @@ const styles = StyleSheet.create({
     justifyContent: 'center', // Centers content vertically
     alignItems: 'center',      // Centers content horizontally
   },
-  image : {
-    height : 160,
-    width : 170
+  image: {
+    height: 160,
+    width: 170
   },
-  title : {
-    fontSize : 30,
-    fontWeight : "bold",
-    textTransform : "uppercase",
+  title: {
+    fontSize: 30,
+    fontWeight: "bold",
+    textTransform: "uppercase",
     textAlign: "center",
-    paddingVertical : 40,
-    color : "green"
+    paddingVertical: 40,
+    color: "green"
   },
-  inputView : {
-    gap : 15,
-    width : "100%",
-    paddingHorizontal : 40,
-    marginTop : 50,
-    marginBottom  :50
+  inputView: {
+    gap: 15,
+    width: "100%",
+    paddingHorizontal: 40,
+    marginTop: 50,
+    marginBottom: 50
   },
-  input : {
-    height : 50,
-    paddingHorizontal : 20,
-    borderColor : "green",
-    borderWidth : 1,
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  input: {
+    flex: 1,
+    height: 50,
+    paddingHorizontal: 20,
+    borderColor: "green",
+    borderWidth: 1,
     borderRadius: 7
   },
-  rememberView : {
-    width : "100%",
-    paddingHorizontal : 50,
-    justifyContent: "space-between",
-    alignItems : "center",
-    flexDirection : "row",
-    marginBottom : 50
+  clearButton: {
+    padding: 10,
   },
-  switch :{
-    flexDirection : "row",
-    gap : 1,
-    justifyContent : "center",
-    alignItems : "center"
-    
+  clearButtonText: {
+    fontSize: 16,
+    color: 'red',
   },
-  rememberText : {
-    fontSize: 13
+  button: {
+    backgroundColor: "green",
+    height: 45,
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center"
   },
-  forgetText : {
-    fontSize : 11,
-    color : "blue"
-  },
-  button : {
-    backgroundColor : "green",
-    height : 45,
-    borderColor : "gray",
-    borderWidth  : 1,
-    borderRadius : 5,
-    alignItems : "center",
-    justifyContent : "center"
-  },
-  buttonText : {
-    color : "white"  ,
+  buttonText: {
+    color: "white",
     fontSize: 18,
-    fontWeight : "bold"
-  }, 
-  buttonView :{
-    width : "100%",
-    paddingHorizontal : 50,
-    marginBottom : 50
+    fontWeight: "bold"
   },
-  footerText : {
+  buttonView: {
+    width: "100%",
+    paddingHorizontal: 50,
+    marginBottom: 50
+  },
+  footerText: {
     textAlign: "center",
-    color : "gray",
+    color: "gray",
   },
-  signup : {
-    color : "blue",
-    fontSize : 13
+  signup: {
+    color: "blue",
+    fontSize: 13
   }
-})
+});
