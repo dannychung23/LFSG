@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { loggedIn, auth } from './index';  // Assuming you already have user authentication logic here
-import { doc, setDoc, deleteDoc, onSnapshot, collection } from "firebase/firestore"; 
+import { loggedIn, auth } from './index'; 
+import { doc, addDoc, deleteDoc, onSnapshot, collection } from "firebase/firestore"; 
 import { db } from '../../FirebaseConfig';
 import { getDocs } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
@@ -50,10 +50,9 @@ export default function Post() {
       alert('You must be logged in to post a group.');
       return;
     }
-
+  
     try {
-      const id = (await getGroupCount()).toString();
-      await setDoc(doc(db, "groups", id), {
+      await addDoc(collection(db, "groups"), {  // Use addDoc instead of setDoc
         name: name,
         description: description,
         userId: user.uid,  // Store the user's ID when posting the group
