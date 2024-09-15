@@ -12,23 +12,22 @@ export default function Post() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
-  const currentUser = getAuth().currentUser;  // Fetch the currently logged-in user
+  const currentUser = getAuth().currentUser;  
 
   useEffect(() => {
     if (currentUser) {
-      setUser(currentUser);  // Save the current user's data
+      setUser(currentUser);  
     }
 
-    // Subscribe to groups collection
     const unsubscribe = onSnapshot(collection(db, "groups"), (snapshot) => {
       const groupsData = snapshot.docs
         .map((doc) => ({
           id: doc.id,
           name: doc.data().name,
           description: doc.data().description,
-          userId: doc.data().userId,  // Store userId for each group
+          userId: doc.data().userId, 
         }))
-        .filter((group) => group.userId === currentUser?.uid); // Only keep groups posted by the current user
+        .filter((group) => group.userId === currentUser?.uid); 
 
       setStudyGroups(groupsData);
       setLoading(false);
@@ -48,7 +47,7 @@ export default function Post() {
       await addDoc(collection(db, "groups"), {
         name: name,
         description: description,
-        userId: user.uid,  // Store the user's ID when posting the group
+        userId: user.uid,  
       });
       alert('Posted Study Group!');
     } catch (error) {
@@ -83,7 +82,6 @@ export default function Post() {
       <Text style={styles.groupName}>{item.name}</Text>
       <Text style={styles.groupDescription}>{item.description}</Text>
       
-      {/* Show delete button only if current user posted this group */}
       {user && item.userId === user.uid ? (
         <TouchableOpacity
           style={styles.deleteButton}
