@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, Button, Image, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Button, Image, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View, TouchableWithoutFeedback, Keyboard } from 'react-native';
 const logo = require("../../assets/images/lfsg_icon.png");
 import { auth } from '../../FirebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
@@ -57,7 +57,7 @@ export default function HomeScreen() {
     try {
       await signOut(firebaseAuth);
       loggedIn = false;
-      
+
       router.replace('./groups');
       router.replace('./new user');
       router.replace('./post')
@@ -75,6 +75,7 @@ export default function HomeScreen() {
 
   if (!loggedIn) {
     return (
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <Text style={styles.title}>LFSG</Text>
         <Image source={logo} style={styles.image} resizeMode='contain' />
@@ -126,6 +127,7 @@ export default function HomeScreen() {
           </Pressable>
         </Text>
       </SafeAreaView>
+      </TouchableWithoutFeedback>
     );
   }
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, TouchableWithoutFeedback, Keyboard } from 'react-native';
 const logo = require("../../assets/images/lfsg_icon.png");
 import { auth, db } from '../../FirebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -19,7 +19,7 @@ export default function newUser() {
         setPassword("")
         setPhone("")
         setUsername("")
-        
+
         try {
             var response = await createUserWithEmailAndPassword(auth, email, password);
             alert('Sign up successful!');
@@ -48,6 +48,7 @@ export default function newUser() {
           )
     }
     return (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <Text style={styles.title}>LFSG</Text>
@@ -131,6 +132,7 @@ export default function newUser() {
                 </View>
             </ScrollView>
         </SafeAreaView>
+        </TouchableWithoutFeedback>
     );
 }
 

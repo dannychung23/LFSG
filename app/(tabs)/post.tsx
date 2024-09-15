@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, FlatList, TouchableOpacity, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { doc, addDoc, deleteDoc, onSnapshot, collection } from "firebase/firestore"; 
 import { db } from '../../FirebaseConfig';
 import { getAuth } from "firebase/auth";
@@ -102,6 +102,7 @@ export default function Post() {
   }
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <View style={styles.container}>
       <Text style={styles.title}>Post a Study Group</Text>
       <View style={styles.inputView}>
@@ -122,21 +123,23 @@ export default function Post() {
           ) : null}
         </View>
         <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder='Description (with time & place)'
-            value={description}
-            onChangeText={setDescription}
-            autoCorrect={false}
-            autoCapitalize='none'
-            placeholderTextColor={"black"}
-          />
-          {description ? (
-            <TouchableOpacity style={styles.clearButton} onPress={() => clearInput(setDescription)}>
-              <Text style={styles.clearButtonText}>X</Text>
-            </TouchableOpacity>
-          ) : null}
-        </View>
+        <TextInput
+          style={[styles.input, styles.descriptionInput]} // Added descriptionInput style
+          placeholder='Description (with time & place)'
+          value={description}
+          onChangeText={setDescription}
+          autoCorrect={false}
+          autoCapitalize='none'
+          placeholderTextColor={"black"}
+          multiline={true} // Allow multiple lines
+        />
+        {description ? (
+          <TouchableOpacity style={styles.clearButton} onPress={() => clearInput(setDescription)}>
+            <Text style={styles.clearButtonText}>X</Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
+
       </View>
       <View style={styles.buttonView}>
         <Pressable style={styles.button} onPress={postGroup}>
@@ -155,10 +158,10 @@ export default function Post() {
         />
       )}
     </View>
+    </TouchableWithoutFeedback>
   );
 }
 
-// Styles for the component
 const styles = StyleSheet.create({
   alert: {
     marginTop: 50
@@ -193,6 +196,10 @@ const styles = StyleSheet.create({
     borderColor: "green",
     borderWidth: 1,
     borderRadius: 7
+  },
+  descriptionInput: {
+    height: 100,  // Increased height for the description
+    textAlignVertical: 'top',  // Aligns text to the top of the input
   },
   clearButton: {
     marginLeft: 10,
